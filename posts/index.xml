@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Posts on My Notes</title>
+    <link>localhost/posts/</link>
+    <description>My Notes (Posts)</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 17 May 2020 23:02:39 +0900</lastBuildDate>
+    
+    <atom:link href="localhost/posts/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Welcome</title>
+      <link>localhost/posts/welcome/</link>
+      <pubDate>Sun, 17 May 2020 23:02:39 +0900</pubDate>
+      
+      <guid>localhost/posts/welcome/</guid>
+      <description>&lt;p&gt;I&amp;rsquo;m not sure if I will write a lot, but let&amp;rsquo;s see what happens&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>
