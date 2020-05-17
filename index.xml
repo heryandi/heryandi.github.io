@@ -6,17 +6,43 @@
     <description>My Notes</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 17 May 2020 23:02:39 +0900</lastBuildDate>
+    <lastBuildDate>Mon, 18 May 2020 00:00:00 +0000</lastBuildDate>
     
     <atom:link href="https://heryandi.github.io/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
-      <title>Welcome</title>
-      <link>https://heryandi.github.io/posts/welcome/</link>
-      <pubDate>Sun, 17 May 2020 23:02:39 +0900</pubDate>
+      <title>Arch Linux broken desktop environment in VirtualBox</title>
+      <link>https://heryandi.github.io/2020/arch-linux-broken-desktop-environment-in-virtualbox/</link>
+      <pubDate>Mon, 18 May 2020 00:00:00 +0000</pubDate>
       
-      <guid>https://heryandi.github.io/posts/welcome/</guid>
+      <guid>https://heryandi.github.io/2020/arch-linux-broken-desktop-environment-in-virtualbox/</guid>
+      <description>&lt;p&gt;I updated my Arch VM with the usual command:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;pacman -Syu
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Then, upon rebooting the VM, after logging-in again, the desktop environment would only show a black screen.
+I was still able to bring up tty2 with &lt;code&gt;Ctrl + Alt + F2&lt;/code&gt;, so it seemed like other than the desktop environment, the VM was running just fine.&lt;/p&gt;
+&lt;p&gt;After some debugging, I suspected that &lt;code&gt;virtualbox-guest-utils&lt;/code&gt; package was the culprit.
+Checking through the update log, it seemed like that package was indeed updated:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;cat /var/log/pacman.log
+...
+&lt;span style=&#34;color:#f92672&#34;&gt;[&lt;/span&gt;2020-05-17T21:21:34+0900&lt;span style=&#34;color:#f92672&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;[&lt;/span&gt;ALPM&lt;span style=&#34;color:#f92672&#34;&gt;]&lt;/span&gt; upgraded xorg-bdftopcf &lt;span style=&#34;color:#f92672&#34;&gt;(&lt;/span&gt;1.1-1 -&amp;gt; 1.1-2&lt;span style=&#34;color:#f92672&#34;&gt;)&lt;/span&gt;
+&lt;span style=&#34;color:#f92672&#34;&gt;[&lt;/span&gt;2020-05-17T21:21:34+0900&lt;span style=&#34;color:#f92672&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;[&lt;/span&gt;ALPM&lt;span style=&#34;color:#f92672&#34;&gt;]&lt;/span&gt; upgraded ttf-hack &lt;span style=&#34;color:#f92672&#34;&gt;(&lt;/span&gt;3.003-1 -&amp;gt; 3.003-2&lt;span style=&#34;color:#f92672&#34;&gt;)&lt;/span&gt;
+&lt;span style=&#34;color:#f92672&#34;&gt;[&lt;/span&gt;2020-05-17T21:21:34+0900&lt;span style=&#34;color:#f92672&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;[&lt;/span&gt;ALPM&lt;span style=&#34;color:#f92672&#34;&gt;]&lt;/span&gt; upgraded virtualbox-guest-utils &lt;span style=&#34;color:#f92672&#34;&gt;(&lt;/span&gt;6.1.6-1 -&amp;gt; 6.1.8-1&lt;span style=&#34;color:#f92672&#34;&gt;)&lt;/span&gt;
+&lt;span style=&#34;color:#f92672&#34;&gt;[&lt;/span&gt;2020-05-17T21:21:34+0900&lt;span style=&#34;color:#f92672&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;[&lt;/span&gt;ALPM&lt;span style=&#34;color:#f92672&#34;&gt;]&lt;/span&gt; upgraded vlc &lt;span style=&#34;color:#f92672&#34;&gt;(&lt;/span&gt;3.0.8-13 -&amp;gt; 3.0.10-1&lt;span style=&#34;color:#f92672&#34;&gt;)&lt;/span&gt;
+&lt;span style=&#34;color:#f92672&#34;&gt;[&lt;/span&gt;2020-05-17T21:21:34+0900&lt;span style=&#34;color:#f92672&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;[&lt;/span&gt;ALPM&lt;span style=&#34;color:#f92672&#34;&gt;]&lt;/span&gt; upgraded vte-common &lt;span style=&#34;color:#f92672&#34;&gt;(&lt;/span&gt;0.60.1-1 -&amp;gt; 0.60.2-2&lt;span style=&#34;color:#f92672&#34;&gt;)&lt;/span&gt;
+...
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;I downgraded back to 6.1.6-1 and things are now good again:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;sudo pacman -U https://archive.archlinux.org/packages/v/virtualbox-guest-utils/virtualbox-guest-utils-6.1.6-1-x86_64.pkg.tar.zst
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;The worst thing about this was that there was no clipboard sharing at the time (because all GUIs were broken), so I had to type the whole URL on the terminal myself :(&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Welcome</title>
+      <link>https://heryandi.github.io/2020/welcome/</link>
+      <pubDate>Sun, 17 May 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://heryandi.github.io/2020/welcome/</guid>
       <description>&lt;p&gt;I&amp;rsquo;m not sure if I will write a lot, but let&amp;rsquo;s see what happens&lt;/p&gt;
 </description>
     </item>
