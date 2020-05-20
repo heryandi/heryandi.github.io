@@ -44,7 +44,7 @@ Anyway, the fix is clear:&lt;/p&gt;
 &lt;li&gt;Find &lt;code&gt;network.stricttransportsecurity.preloadlist&lt;/code&gt;&lt;/li&gt;
 &lt;li&gt;Flip it to &lt;code&gt;false&lt;/code&gt;&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;Done!&lt;/p&gt;
+&lt;p&gt;Done! Shamelessly stolen from &lt;a href=&#34;https://stackoverflow.com/a/54559584/253890&#34;&gt;this StackOverflow answer&lt;/a&gt;.&lt;/p&gt;
 &lt;p&gt;Note: This was Firefox 76.0.1 and Chrome 81.0.4044.138 respectively.&lt;/p&gt;
 </description>
     </item>
