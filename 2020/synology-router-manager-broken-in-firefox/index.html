@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    
+        
+<meta charset="utf-8">
+<meta name="HandheldFriendly" content="True">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="no-referrer-when-downgrade">
+
+<title>Synology Router Manager broken in Firefox  - My Notes</title>
+<meta name="description" content="A random nobody">
+
+<link rel="icon" type="image/x-icon" href="https://heryandi.github.io/favicon.ico">
+<link rel="apple-touch-icon-precomposed" href="https://heryandi.github.io/favicon.png">
+
+<link rel="stylesheet" href="https://heryandi.github.io/css/style.css?rnd=1589980395" />
+
+
+
+<meta property="og:title" content="Synology Router Manager broken in Firefox" />
+<meta property="og:description" content="Synology Router Manager (SRM) is the name of web interface to manage your Synology Router RT2600ac device. For me, my SRM address is configured as http://router.synology.com:8000/webman/index.cgi.
+Recently, when I opened it on Firefox, I got an error page saying something like this:
+An error occurred during a connection to router.synology.com:8000. PR_END_OF_FILE_ERROR I was able to open it just fine on Chrome, so it seemed that Firefox screwed up somewhere.
+Upon further examination, I noticed that on Firefox, I was redirected to HTTPS, so I was actually visiting https://router." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://heryandi.github.io/2020/synology-router-manager-broken-in-firefox/" />
+<meta property="article:published_time" content="2020-05-20T21:36:17+09:00" />
+<meta property="article:modified_time" content="2020-05-20T21:36:17+09:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Synology Router Manager broken in Firefox"/>
+<meta name="twitter:description" content="Synology Router Manager (SRM) is the name of web interface to manage your Synology Router RT2600ac device. For me, my SRM address is configured as http://router.synology.com:8000/webman/index.cgi.
+Recently, when I opened it on Firefox, I got an error page saying something like this:
+An error occurred during a connection to router.synology.com:8000. PR_END_OF_FILE_ERROR I was able to open it just fine on Chrome, so it seemed that Firefox screwed up somewhere.
+Upon further examination, I noticed that on Firefox, I was redirected to HTTPS, so I was actually visiting https://router."/>
+
+
+
+
+
+
+    
+</head>
+<body>
+    <a class="skip-main" href="#main">Skip to main content</a>
+    <div class="container">
+        <header> 
+            
+                <h1 class="site-header">
+    <a href="https://heryandi.github.io">My Notes</a>
+</h1>
+<nav>
+    
+    
+    <a class="" href="/about/" title="">About</a>
+    
+    <a class="" href="/tags/" title="">Tags</a>
+    
+    <a class="" href="/posts/" title="">Archive</a>
+    
+</nav>
+
+            
+        </header>
+        <main id="main" tabindex="-1"> 
+            
+
+    <article class="post">
+        <header>
+            <h1>Synology Router Manager broken in Firefox</h1>
+        </header>
+        <div class="content">
+            <p>Synology Router Manager (SRM) is the name of web interface to manage your
+Synology Router RT2600ac device. For me, my SRM address is configured as
+<code>http://router.synology.com:8000/webman/index.cgi</code>.</p>
+<p>Recently, when I opened it on Firefox, I got an error page saying something
+like this:</p>
+<pre><code>An error occurred during a connection to router.synology.com:8000. PR_END_OF_FILE_ERROR
+</code></pre><p>I was able to open it just fine on Chrome, so it seemed that Firefox screwed
+up somewhere.</p>
+<p>Upon further examination, I noticed that on Firefox, I was redirected to HTTPS,
+so I was actually visiting <code>https://router.synology.com:8000/webman/index.cgi</code>.</p>
+<p>I confirmed that the <code>Automatically redirect HTTP connections to HTTPS</code> and
+<code>Enable HSTS</code> checkboxes in SRM Control Panel were both NOT checked, so why was
+this happening?</p>
+<p>Turns out, there is a totally-not-new concept of HSTS preloading, apparently
+<a href="https://www.chromium.org/hsts/">started in Chrome</a>, but
+<a href="https://blog.mozilla.org/security/2012/11/01/preloading-hsts/">Firefox has followed suit</a>.
+Taking a look at the list preloaded by Firefox (available
+<a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security">here</a>,
+look for <code>nsSTSPreloadList.inc</code>), seems like synology.com is included in the
+list.</p>
+<p>So, maybe Firefox considers <code>router.synology.com:8000</code> the same as <code>synology.com</code>?
+Anyway, the fix is clear:</p>
+<ul>
+<li>Open up <code>about:config</code></li>
+<li>Find <code>network.stricttransportsecurity.preloadlist</code></li>
+<li>Flip it to <code>false</code></li>
+</ul>
+<p>Done!</p>
+<p>Note: This was Firefox 76.0.1 and Chrome 81.0.4044.138 respectively.</p>
+
+        </div>
+        <div class="article-info">
+    
+        <div class="article-date">2020-05-20</div>
+    
+    <div class="article-taxonomies">
+        
+            
+    </div>
+</div>
+
+    </article>
+    
+        <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "heryandi" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+    
+
+
+        </main>
+        <footer>
+            
+                <p>© Heryandi, 2020<br>
+Powered by <a target="_blank" href="https://gohugo.io/">Hugo</a>, theme <a target="_blank" href="https://github.com/mitrichius/hugo-theme-anubis">Anubis</a>.
+</p>
+            
+        </footer>
+    </div>
+</body>
+</html>

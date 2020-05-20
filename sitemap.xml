@@ -3,17 +3,22 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>https://heryandi.github.io/2020/arch-linux-broken-desktop-environment-in-virtualbox/</loc>
-    <lastmod>2020-05-18T00:24:39+09:00</lastmod>
-  </url>
-  
-  <url>
     <loc>https://heryandi.github.io/</loc>
-    <lastmod>2020-05-18T00:24:39+09:00</lastmod>
+    <lastmod>2020-05-20T21:36:17+09:00</lastmod>
   </url>
   
   <url>
     <loc>https://heryandi.github.io/posts/</loc>
+    <lastmod>2020-05-20T21:36:17+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://heryandi.github.io/2020/synology-router-manager-broken-in-firefox/</loc>
+    <lastmod>2020-05-20T21:36:17+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://heryandi.github.io/2020/arch-linux-broken-desktop-environment-in-virtualbox/</loc>
     <lastmod>2020-05-18T00:24:39+09:00</lastmod>
   </url>
   

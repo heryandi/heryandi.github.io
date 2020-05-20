@@ -6,10 +6,48 @@
     <description>My Notes (Posts)</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 18 May 2020 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 20 May 2020 00:00:00 +0000</lastBuildDate>
     
     <atom:link href="https://heryandi.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Synology Router Manager broken in Firefox</title>
+      <link>https://heryandi.github.io/2020/synology-router-manager-broken-in-firefox/</link>
+      <pubDate>Wed, 20 May 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://heryandi.github.io/2020/synology-router-manager-broken-in-firefox/</guid>
+      <description>&lt;p&gt;Synology Router Manager (SRM) is the name of web interface to manage your
+Synology Router RT2600ac device. For me, my SRM address is configured as
+&lt;code&gt;http://router.synology.com:8000/webman/index.cgi&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Recently, when I opened it on Firefox, I got an error page saying something
+like this:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;An error occurred during a connection to router.synology.com:8000. PR_END_OF_FILE_ERROR
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;I was able to open it just fine on Chrome, so it seemed that Firefox screwed
+up somewhere.&lt;/p&gt;
+&lt;p&gt;Upon further examination, I noticed that on Firefox, I was redirected to HTTPS,
+so I was actually visiting &lt;code&gt;https://router.synology.com:8000/webman/index.cgi&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;I confirmed that the &lt;code&gt;Automatically redirect HTTP connections to HTTPS&lt;/code&gt; and
+&lt;code&gt;Enable HSTS&lt;/code&gt; checkboxes in SRM Control Panel were both NOT checked, so why was
+this happening?&lt;/p&gt;
+&lt;p&gt;Turns out, there is a totally-not-new concept of HSTS preloading, apparently
+&lt;a href=&#34;https://www.chromium.org/hsts/&#34;&gt;started in Chrome&lt;/a&gt;, but
+&lt;a href=&#34;https://blog.mozilla.org/security/2012/11/01/preloading-hsts/&#34;&gt;Firefox has followed suit&lt;/a&gt;.
+Taking a look at the list preloaded by Firefox (available
+&lt;a href=&#34;https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security&#34;&gt;here&lt;/a&gt;,
+look for &lt;code&gt;nsSTSPreloadList.inc&lt;/code&gt;), seems like synology.com is included in the
+list.&lt;/p&gt;
+&lt;p&gt;So, maybe Firefox considers &lt;code&gt;router.synology.com:8000&lt;/code&gt; the same as &lt;code&gt;synology.com&lt;/code&gt;?
+Anyway, the fix is clear:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Open up &lt;code&gt;about:config&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Find &lt;code&gt;network.stricttransportsecurity.preloadlist&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Flip it to &lt;code&gt;false&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Done!&lt;/p&gt;
+&lt;p&gt;Note: This was Firefox 76.0.1 and Chrome 81.0.4044.138 respectively.&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>Arch Linux broken desktop environment in VirtualBox</title>
