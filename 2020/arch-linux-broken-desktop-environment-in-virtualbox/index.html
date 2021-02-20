@@ -14,7 +14,7 @@
 <link rel="icon" type="image/x-icon" href="https://heryandi.github.io/favicon.ico">
 <link rel="apple-touch-icon-precomposed" href="https://heryandi.github.io/favicon.png">
 
-<link rel="stylesheet" href="https://heryandi.github.io/css/style.css?rnd=1613832146" />
+<link rel="stylesheet" href="https://heryandi.github.io/css/style.css?rnd=1613832442" />
 
 
 
@@ -70,8 +70,8 @@ After some debugging, I suspected that virtualbox-guest-utils package was the cu
         </header>
         <div class="content">
             <p>I updated my Arch VM with the usual command:</p>
-<pre><code>pacman -Syu
-</code></pre><p>Then, upon rebooting the VM, after logging-in again, the desktop environment would only show a black screen.
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">pacman -Syu
+</code></pre></div><p>Then, upon rebooting the VM, after logging-in again, the desktop environment would only show a black screen.
 I was still able to bring up tty2 with <code>Ctrl + Alt + F2</code>, so it seemed like other than the desktop environment, the VM was running just fine.</p>
 <p>After some debugging, I suspected that <code>virtualbox-guest-utils</code> package was the culprit.
 Checking through the update log, it seemed like that package was indeed updated:</p>

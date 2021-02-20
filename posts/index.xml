@@ -20,29 +20,29 @@
       <description>&lt;p&gt;I decided to write this after facing the surprisingly annoying process of
 installing various packages for machine learning purposes.&lt;/p&gt;
 &lt;p&gt;Let&amp;rsquo;s start from the beginning. Create an environment on anaconda:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;conda create -n pytorch-env python=3
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Switch to the &lt;code&gt;pytorch-env&lt;/code&gt; environment:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;conda activate pytorch-env
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Install PyTorch according to the
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;conda create -n pytorch-env python&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;3&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Switch to the &lt;code&gt;pytorch-env&lt;/code&gt; environment:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;conda activate pytorch-env
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Install PyTorch according to the
 &lt;a href=&#34;https://pytorch.org/get-started/locally/&#34;&gt;official documentation&lt;/a&gt;. Notice that
 it includes &lt;code&gt;cpuonly&lt;/code&gt; instead of &lt;code&gt;cudatoolkit&lt;/code&gt;. This means that there will be no
 CUDA support, which is intentional because I&amp;rsquo;m doing this in a VM.&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;conda install pytorch torchvision torchaudio cpuonly -c pytorch
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Install some other packages commonly used for ML:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;conda install opencv matplotlib jupyterlab nb_conda
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;This is the point where I got this message:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;Solving environment: -
-Found conflicts! Looking for incompatible packages.
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;conda install pytorch torchvision torchaudio cpuonly -c pytorch
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Install some other packages commonly used for ML:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;conda install opencv matplotlib jupyterlab nb_conda
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;This is the point where I got this message:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;Solving environment: -
+Found conflicts! Looking &lt;span style=&#34;color:#66d9ef&#34;&gt;for&lt;/span&gt; incompatible packages.
 This can take several minutes.  Press CTRL-C to abort.
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;This took a really long time to finish, with failures on top of that. Some
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;This took a really long time to finish, with failures on top of that. Some
 suggestions like updating packages (&lt;code&gt;conda update --all&lt;/code&gt;) and allowing
 downgrades (&lt;code&gt;conda config --set allow_conda_downgrades true&lt;/code&gt;) didn&amp;rsquo;t help at
 all.&lt;/p&gt;
 &lt;p&gt;Turns out the solution is quite simple, just install from &lt;code&gt;pytorch&lt;/code&gt; channel as
 well:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;conda install -c pytorch opencv matplotlib jupyterlab nb_conda
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;I saw some packages downgraded when I did that:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;  certifi                          2020.12.5-py38h06a4308_0 --&amp;gt; 2020.12.5-py37h06a4308_0
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;conda install -c pytorch opencv matplotlib jupyterlab nb_conda
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;I saw some packages downgraded when I did that:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;  certifi                          2020.12.5-py38h06a4308_0 --&amp;gt; 2020.12.5-py37h06a4308_0
   mkl-service                          2.3.0-py38he904b0f_0 --&amp;gt; 2.3.0-py37he8ac12f_0
   mkl_fft                              1.2.1-py38h54f3939_0 --&amp;gt; 1.2.1-py37h54f3939_0
   mkl_random                           1.1.1-py38h0573a6f_0 --&amp;gt; 1.1.1-py37h0573a6f_0
@@ -57,7 +57,7 @@ well:&lt;/p&gt;
   six                                 1.15.0-py38h06a4308_0 --&amp;gt; 1.15.0-py37h06a4308_0
   torchaudio                                     0.7.2-py38 --&amp;gt; 0.7.2-py37
   torchvision                                0.8.2-py38_cpu --&amp;gt; 0.8.2-py37_cpu
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;My guess is that the default channel (and &lt;code&gt;conda-forge&lt;/code&gt; too, I tried) didn&amp;rsquo;t
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;My guess is that the default channel (and &lt;code&gt;conda-forge&lt;/code&gt; too, I tried) didn&amp;rsquo;t
 have the older versions of some packages installed through &lt;code&gt;pytorch&lt;/code&gt; in the
 earlier step, so conda just gave up instead.&lt;/p&gt;
 </description>
@@ -108,8 +108,8 @@ Anyway, the fix is clear:&lt;/p&gt;
       
       <guid>https://heryandi.github.io/2020/arch-linux-broken-desktop-environment-in-virtualbox/</guid>
       <description>&lt;p&gt;I updated my Arch VM with the usual command:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;pacman -Syu
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Then, upon rebooting the VM, after logging-in again, the desktop environment would only show a black screen.
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;pacman -Syu
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Then, upon rebooting the VM, after logging-in again, the desktop environment would only show a black screen.
 I was still able to bring up tty2 with &lt;code&gt;Ctrl + Alt + F2&lt;/code&gt;, so it seemed like other than the desktop environment, the VM was running just fine.&lt;/p&gt;
 &lt;p&gt;After some debugging, I suspected that &lt;code&gt;virtualbox-guest-utils&lt;/code&gt; package was the culprit.
 Checking through the update log, it seemed like that package was indeed updated:&lt;/p&gt;
