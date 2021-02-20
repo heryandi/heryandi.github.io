@@ -6,10 +6,62 @@
     <description>My Notes (Posts)</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Wed, 20 May 2020 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 20 Feb 2021 00:00:00 +0000</lastBuildDate>
     
     <atom:link href="https://heryandi.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Setting up machine learning development environment</title>
+      <link>https://heryandi.github.io/2021/setting-up-machine-learning-development-environment/</link>
+      <pubDate>Sat, 20 Feb 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://heryandi.github.io/2021/setting-up-machine-learning-development-environment/</guid>
+      <description>&lt;p&gt;I decided to write this after facing the surprisingly annoying process of
+installing various packages for machine learning purposes.&lt;/p&gt;
+&lt;p&gt;Let&amp;rsquo;s start from the beginning. Create an environment on anaconda:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;conda create -n pytorch-env python=3
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Switch to the &lt;code&gt;pytorch-env&lt;/code&gt; environment:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;conda activate pytorch-env
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Install PyTorch according to the
+&lt;a href=&#34;https://pytorch.org/get-started/locally/&#34;&gt;official documentation&lt;/a&gt;. Notice that
+it includes &lt;code&gt;cpuonly&lt;/code&gt; instead of &lt;code&gt;cudatoolkit&lt;/code&gt;. This means that there will be no
+CUDA support, which is intentional because I&amp;rsquo;m doing this in a VM.&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;conda install pytorch torchvision torchaudio cpuonly -c pytorch
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Install some other packages commonly used for ML:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;conda install opencv matplotlib jupyterlab nb_conda
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;This is the point where I got this message:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;Solving environment: -
+Found conflicts! Looking for incompatible packages.
+This can take several minutes.  Press CTRL-C to abort.
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;This took a really long time to finish, with failures on top of that. Some
+suggestions like updating packages (&lt;code&gt;conda update --all&lt;/code&gt;) and allowing
+downgrades (&lt;code&gt;conda config --set allow_conda_downgrades true&lt;/code&gt;) didn&amp;rsquo;t help at
+all.&lt;/p&gt;
+&lt;p&gt;Turns out the solution is quite simple, just install from &lt;code&gt;pytorch&lt;/code&gt; channel as
+well:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;conda install -c pytorch opencv matplotlib jupyterlab nb_conda
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;I saw some packages downgraded when I did that:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;  certifi                          2020.12.5-py38h06a4308_0 --&amp;gt; 2020.12.5-py37h06a4308_0
+  mkl-service                          2.3.0-py38he904b0f_0 --&amp;gt; 2.3.0-py37he8ac12f_0
+  mkl_fft                              1.2.1-py38h54f3939_0 --&amp;gt; 1.2.1-py37h54f3939_0
+  mkl_random                           1.1.1-py38h0573a6f_0 --&amp;gt; 1.1.1-py37h0573a6f_0
+  ninja                               1.10.2-py38hff7bd54_0 --&amp;gt; 1.10.2-py37hff7bd54_0
+  numpy                               1.19.2-py38h54aff64_0 --&amp;gt; 1.19.2-py37h54aff64_0
+  numpy-base                          1.19.2-py38hfa32c7d_0 --&amp;gt; 1.19.2-py37hfa32c7d_0
+  pillow                               8.1.0-py38he98fc37_0 --&amp;gt; 8.1.0-py37he98fc37_0
+  pip                                 21.0.1-py38h06a4308_0 --&amp;gt; 21.0.1-py37h06a4308_0
+  python                                   3.8.5-h7579374_1 --&amp;gt; 3.7.9-h7579374_0
+  pytorch                                 1.7.1-py3.8_cpu_0 --&amp;gt; 1.7.1-py3.7_cpu_0
+  setuptools                          52.0.0-py38h06a4308_0 --&amp;gt; 52.0.0-py37h06a4308_0
+  six                                 1.15.0-py38h06a4308_0 --&amp;gt; 1.15.0-py37h06a4308_0
+  torchaudio                                     0.7.2-py38 --&amp;gt; 0.7.2-py37
+  torchvision                                0.8.2-py38_cpu --&amp;gt; 0.8.2-py37_cpu
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;My guess is that the default channel (and &lt;code&gt;conda-forge&lt;/code&gt; too, I tried) didn&amp;rsquo;t
+have the older versions of some packages installed through &lt;code&gt;pytorch&lt;/code&gt; in the
+earlier step, so conda just gave up instead.&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>Synology Router Manager broken in Firefox</title>

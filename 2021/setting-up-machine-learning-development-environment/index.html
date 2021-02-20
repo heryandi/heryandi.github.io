@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    
+        
+<meta charset="utf-8">
+<meta name="HandheldFriendly" content="True">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="no-referrer-when-downgrade">
+
+<title>Setting up machine learning development environment  - My Notes</title>
+<meta name="description" content="A random nobody">
+
+<link rel="icon" type="image/x-icon" href="https://heryandi.github.io/favicon.ico">
+<link rel="apple-touch-icon-precomposed" href="https://heryandi.github.io/favicon.png">
+
+<link rel="stylesheet" href="https://heryandi.github.io/css/style.css?rnd=1613832147" />
+
+
+
+<meta property="og:title" content="Setting up machine learning development environment" />
+<meta property="og:description" content="I decided to write this after facing the surprisingly annoying process of installing various packages for machine learning purposes.
+Let&rsquo;s start from the beginning. Create an environment on anaconda:
+conda create -n pytorch-env python=3 Switch to the pytorch-env environment:
+conda activate pytorch-env Install PyTorch according to the official documentation. Notice that it includes cpuonly instead of cudatoolkit. This means that there will be no CUDA support, which is intentional because I&rsquo;m doing this in a VM." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://heryandi.github.io/2021/setting-up-machine-learning-development-environment/" />
+<meta property="article:published_time" content="2021-02-20T22:25:53+09:00" />
+<meta property="article:modified_time" content="2021-02-20T22:25:53+09:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Setting up machine learning development environment"/>
+<meta name="twitter:description" content="I decided to write this after facing the surprisingly annoying process of installing various packages for machine learning purposes.
+Let&rsquo;s start from the beginning. Create an environment on anaconda:
+conda create -n pytorch-env python=3 Switch to the pytorch-env environment:
+conda activate pytorch-env Install PyTorch according to the official documentation. Notice that it includes cpuonly instead of cudatoolkit. This means that there will be no CUDA support, which is intentional because I&rsquo;m doing this in a VM."/>
+
+
+
+
+
+
+    
+</head>
+<body>
+    <a class="skip-main" href="#main">Skip to main content</a>
+    <div class="container">
+        <header> 
+            
+                <h1 class="site-header">
+    <a href="https://heryandi.github.io">My Notes</a>
+</h1>
+<nav>
+    
+    
+    <a class="" href="/about/" title="">About</a>
+    
+    <a class="" href="/tags/" title="">Tags</a>
+    
+    <a class="" href="/posts/" title="">Archive</a>
+    
+</nav>
+
+            
+        </header>
+        <main id="main" tabindex="-1"> 
+            
+
+    <article class="post">
+        <header>
+            <h1>Setting up machine learning development environment</h1>
+        </header>
+        <div class="content">
+            <p>I decided to write this after facing the surprisingly annoying process of
+installing various packages for machine learning purposes.</p>
+<p>Let&rsquo;s start from the beginning. Create an environment on anaconda:</p>
+<pre><code>conda create -n pytorch-env python=3
+</code></pre><p>Switch to the <code>pytorch-env</code> environment:</p>
+<pre><code>conda activate pytorch-env
+</code></pre><p>Install PyTorch according to the
+<a href="https://pytorch.org/get-started/locally/">official documentation</a>. Notice that
+it includes <code>cpuonly</code> instead of <code>cudatoolkit</code>. This means that there will be no
+CUDA support, which is intentional because I&rsquo;m doing this in a VM.</p>
+<pre><code>conda install pytorch torchvision torchaudio cpuonly -c pytorch
+</code></pre><p>Install some other packages commonly used for ML:</p>
+<pre><code>conda install opencv matplotlib jupyterlab nb_conda
+</code></pre><p>This is the point where I got this message:</p>
+<pre><code>Solving environment: -
+Found conflicts! Looking for incompatible packages.
+This can take several minutes.  Press CTRL-C to abort.
+</code></pre><p>This took a really long time to finish, with failures on top of that. Some
+suggestions like updating packages (<code>conda update --all</code>) and allowing
+downgrades (<code>conda config --set allow_conda_downgrades true</code>) didn&rsquo;t help at
+all.</p>
+<p>Turns out the solution is quite simple, just install from <code>pytorch</code> channel as
+well:</p>
+<pre><code>conda install -c pytorch opencv matplotlib jupyterlab nb_conda
+</code></pre><p>I saw some packages downgraded when I did that:</p>
+<pre><code>  certifi                          2020.12.5-py38h06a4308_0 --&gt; 2020.12.5-py37h06a4308_0
+  mkl-service                          2.3.0-py38he904b0f_0 --&gt; 2.3.0-py37he8ac12f_0
+  mkl_fft                              1.2.1-py38h54f3939_0 --&gt; 1.2.1-py37h54f3939_0
+  mkl_random                           1.1.1-py38h0573a6f_0 --&gt; 1.1.1-py37h0573a6f_0
+  ninja                               1.10.2-py38hff7bd54_0 --&gt; 1.10.2-py37hff7bd54_0
+  numpy                               1.19.2-py38h54aff64_0 --&gt; 1.19.2-py37h54aff64_0
+  numpy-base                          1.19.2-py38hfa32c7d_0 --&gt; 1.19.2-py37hfa32c7d_0
+  pillow                               8.1.0-py38he98fc37_0 --&gt; 8.1.0-py37he98fc37_0
+  pip                                 21.0.1-py38h06a4308_0 --&gt; 21.0.1-py37h06a4308_0
+  python                                   3.8.5-h7579374_1 --&gt; 3.7.9-h7579374_0
+  pytorch                                 1.7.1-py3.8_cpu_0 --&gt; 1.7.1-py3.7_cpu_0
+  setuptools                          52.0.0-py38h06a4308_0 --&gt; 52.0.0-py37h06a4308_0
+  six                                 1.15.0-py38h06a4308_0 --&gt; 1.15.0-py37h06a4308_0
+  torchaudio                                     0.7.2-py38 --&gt; 0.7.2-py37
+  torchvision                                0.8.2-py38_cpu --&gt; 0.8.2-py37_cpu
+</code></pre><p>My guess is that the default channel (and <code>conda-forge</code> too, I tried) didn&rsquo;t
+have the older versions of some packages installed through <code>pytorch</code> in the
+earlier step, so conda just gave up instead.</p>
+
+        </div>
+        <div class="article-info">
+    
+        <div class="article-date">2021-02-20</div>
+    
+    <div class="article-taxonomies">
+        
+            
+    </div>
+</div>
+
+    </article>
+    
+        <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "heryandi" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+    
+
+
+        </main>
+        <footer>
+            
+                <p>© Heryandi, 2021<br>
+Powered by <a target="_blank" href="https://gohugo.io/">Hugo</a>, theme <a target="_blank" href="https://github.com/mitrichius/hugo-theme-anubis">Anubis</a>.
+</p>
+            
+        </footer>
+    </div>
+</body>
+</html>
