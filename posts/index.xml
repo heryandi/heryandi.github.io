@@ -6,10 +6,36 @@
     <description>My Notes (Posts)</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sat, 20 Feb 2021 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 23 Mar 2021 00:00:00 +0000</lastBuildDate>
     
     <atom:link href="https://heryandi.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Trails in the Sky</title>
+      <link>https://heryandi.github.io/2021/trails-in-the-sky/</link>
+      <pubDate>Tue, 23 Mar 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://heryandi.github.io/2021/trails-in-the-sky/</guid>
+      <description>&lt;p&gt;I recently finished playing The Legend of Heroes: Trails in the Sky games
+(英雄伝説 空の軌跡).&lt;/p&gt;
+&lt;p&gt;I finished all the obvious quests (those on the job board and all the doors in
+the 3rd), but I didn&amp;rsquo;t 100% the game. Oh well.&lt;/p&gt;
+&lt;p&gt;My play time according to Steam:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;FC: 36 hours&lt;/li&gt;
+&lt;li&gt;SC: 45 hours&lt;/li&gt;
+&lt;li&gt;3rd: 45 hours&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;My play time according to the game itself, which is different from the real time
+because of the in-game speedups:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;FC: 59 hours&lt;/li&gt;
+&lt;li&gt;SC: 86 hours&lt;/li&gt;
+&lt;li&gt;3rd: 79 hours&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+    </item>
     
     <item>
       <title>Setting up machine learning development environment</title>
