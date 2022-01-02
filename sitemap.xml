@@ -1,52 +1,38 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
-  
   <url>
     <loc>https://heryandi.github.io/</loc>
-    <lastmod>2021-03-23T22:18:53+09:00</lastmod>
-  </url>
-  
-  <url>
+    <lastmod>2022-01-03T01:04:17+09:00</lastmod>
+  </url><url>
     <loc>https://heryandi.github.io/posts/</loc>
-    <lastmod>2021-03-23T22:18:53+09:00</lastmod>
-  </url>
-  
-  <url>
+    <lastmod>2022-01-03T01:04:17+09:00</lastmod>
+  </url><url>
+    <loc>https://heryandi.github.io/2022/whereabouts-of-light-%E6%98%9F%E3%81%AE%E5%9C%A8%E3%82%8A%E5%87%A6-comments/</loc>
+    <lastmod>2022-01-03T01:04:17+09:00</lastmod>
+  </url><url>
+    <loc>https://heryandi.github.io/2022/whereabouts-of-light-%E6%98%9F%E3%81%AE%E5%9C%A8%E3%82%8A%E5%87%A6-lyrics/</loc>
+    <lastmod>2022-01-03T01:03:27+09:00</lastmod>
+  </url><url>
     <loc>https://heryandi.github.io/2021/trails-in-the-sky/</loc>
     <lastmod>2021-03-23T22:18:53+09:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://heryandi.github.io/2021/setting-up-machine-learning-development-environment/</loc>
     <lastmod>2021-02-20T22:25:53+09:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://heryandi.github.io/2020/synology-router-manager-broken-in-firefox/</loc>
     <lastmod>2020-05-20T21:36:17+09:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://heryandi.github.io/2020/arch-linux-broken-desktop-environment-in-virtualbox/</loc>
     <lastmod>2020-05-18T00:24:39+09:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://heryandi.github.io/2020/welcome/</loc>
     <lastmod>2020-05-17T23:02:39+09:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://heryandi.github.io/categories/</loc>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://heryandi.github.io/series/</loc>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://heryandi.github.io/tags/</loc>
   </url>
-  
 </urlset>
