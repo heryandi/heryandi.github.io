@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    
+        
+<meta charset="utf-8">
+<meta name="HandheldFriendly" content="True">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="no-referrer-when-downgrade">
+
+<title>Development Environment with Buildah and Podman  - My Notes</title>
+<meta name="description" content="A random nobody">
+
+<link rel="icon" type="image/x-icon" href="https://heryandi.github.io/favicon.ico">
+<link rel="apple-touch-icon-precomposed" href="https://heryandi.github.io/favicon.png">
+
+<link rel="stylesheet" href="https://heryandi.github.io/css/style.css?rnd=1650544163" />
+
+
+
+<meta property="og:title" content="Development Environment with Buildah and Podman" />
+<meta property="og:description" content="This is about having a development environment where you can build and run programs without installing the necessary compilers in your system directly. More specifically, the compilers will run inside containers, which in our case here will be built and run with Buildah and Podman. You can use Docker too if you want.
+The cool kids are doing Rust now, so let&rsquo;s use that for the example. Since this post is mostly about Buildah and Podman, I&rsquo;ll assume that Rust/Cargo is already set up properly in your system." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://heryandi.github.io/2022/development-environment-with-buildah-and-podman/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2022-04-21T21:15:00+09:00" />
+<meta property="article:modified_time" content="2022-04-21T21:15:00+09:00" />
+
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Development Environment with Buildah and Podman"/>
+<meta name="twitter:description" content="This is about having a development environment where you can build and run programs without installing the necessary compilers in your system directly. More specifically, the compilers will run inside containers, which in our case here will be built and run with Buildah and Podman. You can use Docker too if you want.
+The cool kids are doing Rust now, so let&rsquo;s use that for the example. Since this post is mostly about Buildah and Podman, I&rsquo;ll assume that Rust/Cargo is already set up properly in your system."/>
+
+
+
+
+
+
+    
+</head>
+<body>
+    <a class="skip-main" href="#main">Skip to main content</a>
+    <div class="container">
+        <header> 
+            
+                <h1 class="site-header">
+    <a href="https://heryandi.github.io">My Notes</a>
+</h1>
+<nav>
+    
+    
+    <a class="" href="/about/" title="">About</a>
+    
+    <a class="" href="/tags/" title="">Tags</a>
+    
+    <a class="" href="/posts/" title="">Archive</a>
+    
+</nav>
+
+            
+        </header>
+        <main id="main" tabindex="-1"> 
+            
+
+    <article class="post">
+        <header>
+            <h1>Development Environment with Buildah and Podman</h1>
+        </header>
+        <div class="content">
+            <p>This is about having a development environment where you can build and run programs without installing the necessary compilers in your system directly.
+More specifically, the compilers will run inside containers, which in our case here will be built and run with Buildah and Podman. You can use Docker too if you want.</p>
+<p>The cool kids are doing Rust now, so let&rsquo;s use that for the example.
+Since this post is mostly about Buildah and Podman, I&rsquo;ll assume that Rust/Cargo is already set up properly in your system.</p>
+<h1 id="installation">Installation</h1>
+<p>I&rsquo;m using Arch, so <code>pacman</code> for me:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sudo pacman -S buildah podman
+</span></span></code></pre></div><p>Set up subuid and subgid:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sudo touch /etc/subuid /etc/subgid
+</span></span><span style="display:flex;"><span>sudo usermod --add-subuids 100000-165535 --add-subgids 100000-165535 vagrant
+</span></span></code></pre></div><p>Note: Replace <code>vagrant</code> with the actual username you need.</p>
+<p>You can read more about subuid and subgid <a href="https://rootlesscontaine.rs/getting-started/common/subuid/">here</a>.</p>
+<p>That should be all!</p>
+<h1 id="verify-installation">Verify Installation</h1>
+<p>Let&rsquo;s make sure both Buildah and Podman are working correctly.</p>
+<p>Commands were stolen from <a href="https://github.com/containers/buildah/blob/main/docs/tutorials/01-intro.md#using-containerfilesdockerfiles-with-buildah">here</a> with pretty much no modification.</p>
+<h2 id="buildah">Buildah</h2>
+<p>For Buildah, create a <code>Containerfile</code> (or <code>Dockerfile</code> if you want) somewhere with this content:</p>
+<pre tabindex="0"><code># Base on the most recently released Fedora
+FROM fedora:latest
+MAINTAINER ipbabble email buildahboy@redhat.com # not a real email
+
+# Install updates and httpd
+RUN echo &#34;Updating all fedora packages&#34;; dnf -y update; dnf -y clean all
+RUN echo &#34;Installing httpd&#34;; dnf -y install httpd &amp;&amp; dnf -y clean all
+
+# Expose the default httpd port 80
+EXPOSE 80
+
+# Run the httpd
+CMD [&#34;/usr/sbin/httpd&#34;, &#34;-DFOREGROUND&#34;]
+</code></pre><p>Build an image with Buildah:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>buildah build -t fedora-httpd
+</span></span></code></pre></div><p>If Buildah is working correctly, then you should get an output like this:</p>
+<pre tabindex="0"><code>...
+Writing manifest to image destination
+Storing signatures
+--&gt; 4eb47351679
+Successfully tagged localhost/fedora-httpd:latest
+4eb47351679b2983655b4ed5487ec438b34d6034686ebfe3c204072612c6bb63
+</code></pre><h2 id="podman">Podman</h2>
+<p>Now let&rsquo;s run a container with Podman:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>podman run --rm -p 8123:80 fedora-httpd
+</span></span></code></pre></div><p>And since there&rsquo;s a HTTP server running now, you might as well hit it with curl (on another terminal) to verify that it&rsquo;s working:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>curl localhost:8123
+</span></span></code></pre></div><p>If Podman works correctly, you should get a test HTML page as the output.
+You can stop the container running the HTTP server now (with Ctrl+C, nothing special).</p>
+<h1 id="cleanup">Cleanup</h1>
+<p>If you want to be clean, you can get rid of all the test images we created above:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>buildah rmi fedora fedora-httpd
+</span></span></code></pre></div><h1 id="rust-development-environment-using-buildah-and-podman">Rust development environment using Buildah and Podman</h1>
+<p>Now that Buildah and Podman are confirmed working, let&rsquo;s use them to build a simple Rust project.
+Let&rsquo;s start with creating a new project with Cargo.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>cargo new --bin testproject
+</span></span></code></pre></div><p>Create a <code>Containerfile</code> inside the project directory with this content:</p>
+<pre tabindex="0"><code>FROM docker.io/rust:1.60
+
+COPY ./ ./
+
+RUN cargo build --release
+</code></pre><p>Now use Buildah to build the binary:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>buildah build -t testproject
+</span></span></code></pre></div><p>You should be able to see something like this inside the output:</p>
+<pre tabindex="0"><code>...
+STEP 3/3: RUN cargo build --release
+   Compiling testproject v0.1.0 (/)
+    Finished release [optimized] target(s) in 2.34s
+COMMIT testproject
+...
+</code></pre><p>Now use Podman to run the binary built:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>podman run --rm testproject ./target/release/testproject
+</span></span></code></pre></div><p>You should get the expected output:</p>
+<pre tabindex="0"><code>Hello, world!
+</code></pre><p>That&rsquo;s all!</p>
+<p>There are more advanced things to do, but I have no interest in writing it.
+Someone else on the internet has probably written it already :)</p>
+<h1 id="troubleshooting">Troubleshooting</h1>
+<p>This section will not be comprehensive. It&rsquo;s just where I record the errors I got myself.</p>
+<h2 id="fuse-overlayfs">fuse-overlayfs</h2>
+<p>If you get an error like this:</p>
+<pre tabindex="0"><code>Error: kernel does not support overlay fs: &#39;overlay&#39; is not supported over &lt;unknown&gt; at &#34;/home/vagrant/.local/share/containers/storage/overlay&#34;: backing file system is unsupported for this graph driver
+</code></pre><p>Then install <code>fuse-overlayfs</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sudo pacman -S fuse-overlayfs
+</span></span></code></pre></div><p>Then, edit <code>containers.conf</code> according to <a href="https://github.com/containers/podman/blob/main/docs/tutorials/rootless_tutorial.md#ensure-fuse-overlayfs-is-installed">the doc here</a>.
+For me, I only had to uncomment the <code>mount_program</code> line in <code>/etc/containers/storage.conf</code> like this:</p>
+<pre tabindex="0"><code>...
+# Path to an helper program to use for mounting the file system instead of mounting it
+# directly.
+mount_program = &#34;/usr/bin/fuse-overlayfs&#34;
+...
+</code></pre><h2 id="references">References</h2>
+<ul>
+<li><a href="https://docs.podman.io/en/latest/Introduction.html">https://docs.podman.io/en/latest/Introduction.html</a></li>
+<li><a href="https://github.com/containers/podman/blob/main/docs/tutorials/rootless_tutorial.md">https://github.com/containers/podman/blob/main/docs/tutorials/rootless_tutorial.md</a></li>
+<li><a href="https://wiki.archlinux.org/title/Podman">https://wiki.archlinux.org/title/Podman</a></li>
+<li><a href="https://rootlesscontaine.rs/">https://rootlesscontaine.rs/</a></li>
+</ul>
+
+        </div>
+        <div class="article-info">
+    
+        <div class="article-date">2022-04-21</div>
+    
+    <div class="article-taxonomies">
+        
+            
+    </div>
+</div>
+
+    </article>
+    
+        <div id="disqus_thread"></div>
+<script type="application/javascript">
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "heryandi" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+    
+
+
+        </main>
+        <footer>
+            
+                <p>© Heryandi, 2022<br>
+Powered by <a target="_blank" href="https://gohugo.io/">Hugo</a>, theme <a target="_blank" href="https://github.com/mitrichius/hugo-theme-anubis">Anubis</a>.
+</p>
+            
+        </footer>
+    </div>
+</body>
+</html>
