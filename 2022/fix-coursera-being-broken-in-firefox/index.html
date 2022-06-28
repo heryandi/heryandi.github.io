@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    
+        
+<meta charset="utf-8">
+<meta name="HandheldFriendly" content="True">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="no-referrer-when-downgrade">
+
+<title>Fix Coursera being broken in Firefox  - My Notes</title>
+<meta name="description" content="A random nobody">
+
+<link rel="icon" type="image/x-icon" href="https://heryandi.github.io/favicon.ico">
+<link rel="apple-touch-icon-precomposed" href="https://heryandi.github.io/favicon.png">
+
+<link rel="stylesheet" href="https://heryandi.github.io/css/style.css?rnd=1656426117" />
+
+
+
+<meta property="og:title" content="Fix Coursera being broken in Firefox" />
+<meta property="og:description" content="I have been unable to open Coursera website on Firefox for a long time now. At least 3 years. Maybe 5&#43; years. Nah, I don&rsquo;t remember since when exactly. It just showed the page with this text:
+Sorry, we are down for maintenance. We will be back up shortly. Many quick searches on Google didn&rsquo;t show anything, so there are probably not many people experiencing this issue. I&rsquo;ve tried disabling all add-ons, but it didn&rsquo;t work either." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://heryandi.github.io/2022/fix-coursera-being-broken-in-firefox/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2022-06-28T23:20:00+09:00" />
+<meta property="article:modified_time" content="2022-06-28T23:20:00+09:00" />
+
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Fix Coursera being broken in Firefox"/>
+<meta name="twitter:description" content="I have been unable to open Coursera website on Firefox for a long time now. At least 3 years. Maybe 5&#43; years. Nah, I don&rsquo;t remember since when exactly. It just showed the page with this text:
+Sorry, we are down for maintenance. We will be back up shortly. Many quick searches on Google didn&rsquo;t show anything, so there are probably not many people experiencing this issue. I&rsquo;ve tried disabling all add-ons, but it didn&rsquo;t work either."/>
+
+
+
+
+
+
+    
+</head>
+<body>
+    <a class="skip-main" href="#main">Skip to main content</a>
+    <div class="container">
+        <header> 
+            
+                <h1 class="site-header">
+    <a href="https://heryandi.github.io">My Notes</a>
+</h1>
+<nav>
+    
+    
+    <a class="" href="/about/" title="">About</a>
+    
+    <a class="" href="/tags/" title="">Tags</a>
+    
+    <a class="" href="/posts/" title="">Archive</a>
+    
+</nav>
+
+            
+        </header>
+        <main id="main" tabindex="-1"> 
+            
+
+    <article class="post">
+        <header>
+            <h1>Fix Coursera being broken in Firefox</h1>
+        </header>
+        <div class="content">
+            <p>I have been unable to open Coursera website on Firefox for a long time now.
+At least 3 years. Maybe 5+ years. Nah, I don&rsquo;t remember since when exactly.
+It just showed the page with this text:</p>
+<pre tabindex="0"><code>Sorry, we are down for maintenance.
+We will be back up shortly.
+</code></pre><p>Many quick searches on Google didn&rsquo;t show anything, so there are probably not many people experiencing this issue.
+I&rsquo;ve tried disabling all add-ons, but it didn&rsquo;t work either.</p>
+<p>The website works just fine in Chrome, which makes sense of course, since that&rsquo;s the most widely used browser now, but breaking the entire website for Firefox sounded way too sloppy for Coursera.</p>
+<p>Their website is quite technically difficult after all: Many different courses, videos, assignment submissions, etc.
+For them to fail to support Firefox entirely didn&rsquo;t sound right.</p>
+<p>I personally had been using Chrome for Coursera for a very long time to avoid this issue. After many years of that, I finally decided to take a closer look. I had a big hint, after all: It works fine in Chrome.</p>
+<p>So&hellip; I couldn&rsquo;t even load the home page with Firefox, which should be just basic GET requests.
+What was the raw HTTP header response returned? Here you go:</p>
+<pre tabindex="0"><code>HTTP/2 500 Internal Server Error
+content-type: text/html
+content-length: 1020
+date: Tue, 28 Jun 2022 13:09:22 GMT
+x-cache: Error from cloudfront
+via: 1.1 51840d06a8ec9d04d9a07458d05eb7ce.cloudfront.net (CloudFront)
+x-amz-cf-pop: NRT12-C4
+x-amz-cf-id: vN4DPF4IGSgbTNayll-1asw_NWhOasFrurqOVjtIcY2BJwWcRA3w1w==
+X-Firefox-Spdy: h2
+</code></pre><p>Not helpful. I tried Google the <code>Error from cloudfront</code> part too, but nothing interesting showed up.
+Maybe the most helpful part of that was the fact that it&rsquo;s error 500. Gee, thanks.
+If it&rsquo;s actually purely the server&rsquo;s fault, I would expect more complaints of this to be found in Google.</p>
+<p>Something with the request headers maybe? Let&rsquo;s look there. Here is the one sent by Firefox:</p>
+<pre tabindex="0"><code>GET / HTTP/2
+Host: www.coursera.org
+User-Agent: &lt;redacted&gt;
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8
+Accept-Language: en,en-US;q=0.7,chrome://global/locale/intl.properties;q=0.3
+Accept-Encoding: gzip, deflate, br
+Connection: keep-alive
+Cookie: &lt;redacted&gt;
+Upgrade-Insecure-Requests: 1
+Sec-Fetch-Dest: document
+Sec-Fetch-Mode: navigate
+Sec-Fetch-Site: cross-site
+TE: trailers
+</code></pre><p>I can&rsquo;t tell immediately what is wrong. Can you do better?</p>
+<p>Anyway, what about Chrome? Here it is:</p>
+<pre tabindex="0"><code>:authority: www.coursera.org
+:method: GET
+:path: /
+:scheme: https
+accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9
+accept-encoding: gzip, deflate, br
+accept-language: en-US,en;q=0.9
+cache-control: no-cache
+cookie: &lt;redacted&gt;
+pragma: no-cache
+referer: https://www.coursera.org/?authMode=login
+sec-ch-ua: &lt;redacted&gt;
+sec-ch-ua-mobile: ?0
+sec-ch-ua-platform: &#34;Windows&#34;
+sec-fetch-dest: document
+sec-fetch-mode: navigate
+sec-fetch-site: same-origin
+sec-fetch-user: ?1
+upgrade-insecure-requests: 1
+user-agent: &lt;redacted&gt;
+</code></pre><p>Okay, a few headers are different, of course.
+Here is my list of suspects:</p>
+<ul>
+<li>user-agent</li>
+<li>accept</li>
+<li>accept-language</li>
+</ul>
+<p>Now, let&rsquo;s copy-paste the value sent by Chrome one-by-one and resend the HTTP request from Firefox.
+To do this on Firefox: Open up Web Developer Tools, Network tab, right-click on the failing request, then choose <code>Edit and Resend</code>.</p>
+<p>&hellip;and voila, <code>accept-language</code> is the problem.
+What&rsquo;s wrong with the value sent by Firefox?</p>
+<pre tabindex="0"><code>Accept-Language: en,en-US;q=0.7,chrome://global/locale/intl.properties;q=0.3
+</code></pre><p>With just this, that <code>chrome://global/locale/intl.properties</code> stuff looks suspicious as hell.
+Time to look it up. I found this in Ubuntu bugs: <a href="https://bugs.launchpad.net/ubuntu/+source/firefox/+bug/643899"><code>Firefox sending header &quot;Accept-Language: chrome://global/locale/intl.properties&quot;</code></a>.</p>
+<p>Well&hellip; the bug was filed in 2010. By the way, Coursera was founded in 2012 lol.</p>
+<p>Anyway, I guess I&rsquo;ve been affected by the bug very long because I have been using Firefox Sync to sync my preferences everywhere on new computers, effectively perpetuating the bug to myself.
+Also, I never thought of trying out Coursera when I just finished setting up a VM either, so I never tried a real clean Firefox on Coursera.</p>
+<p>We don&rsquo;t really need to figure out where the <code>chrome://global/locale/intl.properties</code> value came from. Let&rsquo;s just remove it!</p>
+<p>Go to <code>about:config</code>, look for <code>intl.accept_languages</code>, click the <code>reset</code> button &hellip;and Coursera website can load just fine in Firefox now! The value of <code>intl.accept_languages</code> shown in <code>about:config</code> now is:</p>
+<pre tabindex="0"><code>en-US, en
+</code></pre><p>Next question: Why only Coursera? For the real answer, go ask Coursera folks, of course.</p>
+<p>My best guess is that they have their own custom web server and it considers that <code>chrome://global/locale/intl.properties</code> value in <code>accept-language</code> as suspicious and rejects it immediately. Or maybe it tries to parse that value and failed miserably lol.</p>
+<p>Or&hellip; Wait, the error message earlier said something about Cloudflare, so maybe it&rsquo;s something about that instead. Well, I don&rsquo;t want to dig further. Bye!</p>
+
+        </div>
+        <div class="article-info">
+    
+        <div class="article-date">2022-06-28</div>
+    
+    <div class="article-taxonomies">
+        
+            
+    </div>
+</div>
+
+    </article>
+    
+        <div id="disqus_thread"></div>
+<script type="application/javascript">
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "heryandi" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+    
+
+
+        </main>
+        <footer>
+            
+                <p>© Heryandi, 2022<br>
+Powered by <a target="_blank" href="https://gohugo.io/">Hugo</a>, theme <a target="_blank" href="https://github.com/mitrichius/hugo-theme-anubis">Anubis</a>.
+</p>
+            
+        </footer>
+    </div>
+</body>
+</html>

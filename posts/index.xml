@@ -6,10 +6,209 @@
     <description>My Notes (Posts)</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 03 Jan 2022 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 28 Jun 2022 00:00:00 +0000</lastBuildDate>
     
     <atom:link href="https://heryandi.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Fix Coursera being broken in Firefox</title>
+      <link>https://heryandi.github.io/2022/fix-coursera-being-broken-in-firefox/</link>
+      <pubDate>Tue, 28 Jun 2022 00:00:00 +0000</pubDate>
+      
+      <guid>https://heryandi.github.io/2022/fix-coursera-being-broken-in-firefox/</guid>
+      <description>&lt;p&gt;I have been unable to open Coursera website on Firefox for a long time now.
+At least 3 years. Maybe 5+ years. Nah, I don&amp;rsquo;t remember since when exactly.
+It just showed the page with this text:&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;Sorry, we are down for maintenance.
+We will be back up shortly.
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Many quick searches on Google didn&amp;rsquo;t show anything, so there are probably not many people experiencing this issue.
+I&amp;rsquo;ve tried disabling all add-ons, but it didn&amp;rsquo;t work either.&lt;/p&gt;
+&lt;p&gt;The website works just fine in Chrome, which makes sense of course, since that&amp;rsquo;s the most widely used browser now, but breaking the entire website for Firefox sounded way too sloppy for Coursera.&lt;/p&gt;
+&lt;p&gt;Their website is quite technically difficult after all: Many different courses, videos, assignment submissions, etc.
+For them to fail to support Firefox entirely didn&amp;rsquo;t sound right.&lt;/p&gt;
+&lt;p&gt;I personally had been using Chrome for Coursera for a very long time to avoid this issue. After many years of that, I finally decided to take a closer look. I had a big hint, after all: It works fine in Chrome.&lt;/p&gt;
+&lt;p&gt;So&amp;hellip; I couldn&amp;rsquo;t even load the home page with Firefox, which should be just basic GET requests.
+What was the raw HTTP header response returned? Here you go:&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;HTTP/2 500 Internal Server Error
+content-type: text/html
+content-length: 1020
+date: Tue, 28 Jun 2022 13:09:22 GMT
+x-cache: Error from cloudfront
+via: 1.1 51840d06a8ec9d04d9a07458d05eb7ce.cloudfront.net (CloudFront)
+x-amz-cf-pop: NRT12-C4
+x-amz-cf-id: vN4DPF4IGSgbTNayll-1asw_NWhOasFrurqOVjtIcY2BJwWcRA3w1w==
+X-Firefox-Spdy: h2
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Not helpful. I tried Google the &lt;code&gt;Error from cloudfront&lt;/code&gt; part too, but nothing interesting showed up.
+Maybe the most helpful part of that was the fact that it&amp;rsquo;s error 500. Gee, thanks.
+If it&amp;rsquo;s actually purely the server&amp;rsquo;s fault, I would expect more complaints of this to be found in Google.&lt;/p&gt;
+&lt;p&gt;Something with the request headers maybe? Let&amp;rsquo;s look there. Here is the one sent by Firefox:&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;GET / HTTP/2
+Host: www.coursera.org
+User-Agent: &amp;lt;redacted&amp;gt;
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8
+Accept-Language: en,en-US;q=0.7,chrome://global/locale/intl.properties;q=0.3
+Accept-Encoding: gzip, deflate, br
+Connection: keep-alive
+Cookie: &amp;lt;redacted&amp;gt;
+Upgrade-Insecure-Requests: 1
+Sec-Fetch-Dest: document
+Sec-Fetch-Mode: navigate
+Sec-Fetch-Site: cross-site
+TE: trailers
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;I can&amp;rsquo;t tell immediately what is wrong. Can you do better?&lt;/p&gt;
+&lt;p&gt;Anyway, what about Chrome? Here it is:&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;:authority: www.coursera.org
+:method: GET
+:path: /
+:scheme: https
+accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9
+accept-encoding: gzip, deflate, br
+accept-language: en-US,en;q=0.9
+cache-control: no-cache
+cookie: &amp;lt;redacted&amp;gt;
+pragma: no-cache
+referer: https://www.coursera.org/?authMode=login
+sec-ch-ua: &amp;lt;redacted&amp;gt;
+sec-ch-ua-mobile: ?0
+sec-ch-ua-platform: &amp;#34;Windows&amp;#34;
+sec-fetch-dest: document
+sec-fetch-mode: navigate
+sec-fetch-site: same-origin
+sec-fetch-user: ?1
+upgrade-insecure-requests: 1
+user-agent: &amp;lt;redacted&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Okay, a few headers are different, of course.
+Here is my list of suspects:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;user-agent&lt;/li&gt;
+&lt;li&gt;accept&lt;/li&gt;
+&lt;li&gt;accept-language&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Now, let&amp;rsquo;s copy-paste the value sent by Chrome one-by-one and resend the HTTP request from Firefox.
+To do this on Firefox: Open up Web Developer Tools, Network tab, right-click on the failing request, then choose &lt;code&gt;Edit and Resend&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;&amp;hellip;and voila, &lt;code&gt;accept-language&lt;/code&gt; is the problem.
+What&amp;rsquo;s wrong with the value sent by Firefox?&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;Accept-Language: en,en-US;q=0.7,chrome://global/locale/intl.properties;q=0.3
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;With just this, that &lt;code&gt;chrome://global/locale/intl.properties&lt;/code&gt; stuff looks suspicious as hell.
+Time to look it up. I found this in Ubuntu bugs: &lt;a href=&#34;https://bugs.launchpad.net/ubuntu/+source/firefox/+bug/643899&#34;&gt;&lt;code&gt;Firefox sending header &amp;quot;Accept-Language: chrome://global/locale/intl.properties&amp;quot;&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Well&amp;hellip; the bug was filed in 2010. By the way, Coursera was founded in 2012 lol.&lt;/p&gt;
+&lt;p&gt;Anyway, I guess I&amp;rsquo;ve been affected by the bug very long because I have been using Firefox Sync to sync my preferences everywhere on new computers, effectively perpetuating the bug to myself.
+Also, I never thought of trying out Coursera when I just finished setting up a VM either, so I never tried a real clean Firefox on Coursera.&lt;/p&gt;
+&lt;p&gt;We don&amp;rsquo;t really need to figure out where the &lt;code&gt;chrome://global/locale/intl.properties&lt;/code&gt; value came from. Let&amp;rsquo;s just remove it!&lt;/p&gt;
+&lt;p&gt;Go to &lt;code&gt;about:config&lt;/code&gt;, look for &lt;code&gt;intl.accept_languages&lt;/code&gt;, click the &lt;code&gt;reset&lt;/code&gt; button &amp;hellip;and Coursera website can load just fine in Firefox now! The value of &lt;code&gt;intl.accept_languages&lt;/code&gt; shown in &lt;code&gt;about:config&lt;/code&gt; now is:&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;en-US, en
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Next question: Why only Coursera? For the real answer, go ask Coursera folks, of course.&lt;/p&gt;
+&lt;p&gt;My best guess is that they have their own custom web server and it considers that &lt;code&gt;chrome://global/locale/intl.properties&lt;/code&gt; value in &lt;code&gt;accept-language&lt;/code&gt; as suspicious and rejects it immediately. Or maybe it tries to parse that value and failed miserably lol.&lt;/p&gt;
+&lt;p&gt;Or&amp;hellip; Wait, the error message earlier said something about Cloudflare, so maybe it&amp;rsquo;s something about that instead. Well, I don&amp;rsquo;t want to dig further. Bye!&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Development Environment with Buildah and Podman</title>
+      <link>https://heryandi.github.io/2022/development-environment-with-buildah-and-podman/</link>
+      <pubDate>Thu, 21 Apr 2022 00:00:00 +0000</pubDate>
+      
+      <guid>https://heryandi.github.io/2022/development-environment-with-buildah-and-podman/</guid>
+      <description>&lt;p&gt;This is about having a development environment where you can build and run programs without installing the necessary compilers in your system directly.
+More specifically, the compilers will run inside containers, which in our case here will be built and run with Buildah and Podman. You can use Docker too if you want.&lt;/p&gt;
+&lt;p&gt;The cool kids are doing Rust now, so let&amp;rsquo;s use that for the example.
+Since this post is mostly about Buildah and Podman, I&amp;rsquo;ll assume that Rust/Cargo is already set up properly in your system.&lt;/p&gt;
+&lt;h1 id=&#34;installation&#34;&gt;Installation&lt;/h1&gt;
+&lt;p&gt;I&amp;rsquo;m using Arch, so &lt;code&gt;pacman&lt;/code&gt; for me:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo pacman -S buildah podman
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Set up subuid and subgid:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo touch /etc/subuid /etc/subgid
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo usermod --add-subuids 100000-165535 --add-subgids 100000-165535 vagrant
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Note: Replace &lt;code&gt;vagrant&lt;/code&gt; with the actual username you need.&lt;/p&gt;
+&lt;p&gt;You can read more about subuid and subgid &lt;a href=&#34;https://rootlesscontaine.rs/getting-started/common/subuid/&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;That should be all!&lt;/p&gt;
+&lt;h1 id=&#34;verify-installation&#34;&gt;Verify Installation&lt;/h1&gt;
+&lt;p&gt;Let&amp;rsquo;s make sure both Buildah and Podman are working correctly.&lt;/p&gt;
+&lt;p&gt;Commands were stolen from &lt;a href=&#34;https://github.com/containers/buildah/blob/main/docs/tutorials/01-intro.md#using-containerfilesdockerfiles-with-buildah&#34;&gt;here&lt;/a&gt; with pretty much no modification.&lt;/p&gt;
+&lt;h2 id=&#34;buildah&#34;&gt;Buildah&lt;/h2&gt;
+&lt;p&gt;For Buildah, create a &lt;code&gt;Containerfile&lt;/code&gt; (or &lt;code&gt;Dockerfile&lt;/code&gt; if you want) somewhere with this content:&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;# Base on the most recently released Fedora
+FROM fedora:latest
+MAINTAINER ipbabble email buildahboy@redhat.com # not a real email
+
+# Install updates and httpd
+RUN echo &amp;#34;Updating all fedora packages&amp;#34;; dnf -y update; dnf -y clean all
+RUN echo &amp;#34;Installing httpd&amp;#34;; dnf -y install httpd &amp;amp;&amp;amp; dnf -y clean all
+
+# Expose the default httpd port 80
+EXPOSE 80
+
+# Run the httpd
+CMD [&amp;#34;/usr/sbin/httpd&amp;#34;, &amp;#34;-DFOREGROUND&amp;#34;]
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Build an image with Buildah:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;buildah build -t fedora-httpd
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;If Buildah is working correctly, then you should get an output like this:&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;...
+Writing manifest to image destination
+Storing signatures
+--&amp;gt; 4eb47351679
+Successfully tagged localhost/fedora-httpd:latest
+4eb47351679b2983655b4ed5487ec438b34d6034686ebfe3c204072612c6bb63
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;podman&#34;&gt;Podman&lt;/h2&gt;
+&lt;p&gt;Now let&amp;rsquo;s run a container with Podman:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;podman run --rm -p 8123:80 fedora-httpd
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;And since there&amp;rsquo;s a HTTP server running now, you might as well hit it with curl (on another terminal) to verify that it&amp;rsquo;s working:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;curl localhost:8123
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;If Podman works correctly, you should get a test HTML page as the output.
+You can stop the container running the HTTP server now (with Ctrl+C, nothing special).&lt;/p&gt;
+&lt;h1 id=&#34;cleanup&#34;&gt;Cleanup&lt;/h1&gt;
+&lt;p&gt;If you want to be clean, you can get rid of all the test images we created above:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;buildah rmi fedora fedora-httpd
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h1 id=&#34;rust-development-environment-using-buildah-and-podman&#34;&gt;Rust development environment using Buildah and Podman&lt;/h1&gt;
+&lt;p&gt;Now that Buildah and Podman are confirmed working, let&amp;rsquo;s use them to build a simple Rust project.
+Let&amp;rsquo;s start with creating a new project with Cargo.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;cargo new --bin testproject
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Create a &lt;code&gt;Containerfile&lt;/code&gt; inside the project directory with this content:&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;FROM docker.io/rust:1.60
+
+COPY ./ ./
+
+RUN cargo build --release
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Now use Buildah to build the binary:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;buildah build -t testproject
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;You should be able to see something like this inside the output:&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;...
+STEP 3/3: RUN cargo build --release
+   Compiling testproject v0.1.0 (/)
+    Finished release [optimized] target(s) in 2.34s
+COMMIT testproject
+...
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Now use Podman to run the binary built:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;podman run --rm testproject ./target/release/testproject
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;You should get the expected output:&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;Hello, world!
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;That&amp;rsquo;s all!&lt;/p&gt;
+&lt;p&gt;There are more advanced things to do, but I have no interest in writing it.
+Someone else on the internet has probably written it already :)&lt;/p&gt;
+&lt;h1 id=&#34;troubleshooting&#34;&gt;Troubleshooting&lt;/h1&gt;
+&lt;p&gt;This section will not be comprehensive. It&amp;rsquo;s just where I record the errors I got myself.&lt;/p&gt;
+&lt;h2 id=&#34;fuse-overlayfs&#34;&gt;fuse-overlayfs&lt;/h2&gt;
+&lt;p&gt;If you get an error like this:&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;Error: kernel does not support overlay fs: &amp;#39;overlay&amp;#39; is not supported over &amp;lt;unknown&amp;gt; at &amp;#34;/home/vagrant/.local/share/containers/storage/overlay&amp;#34;: backing file system is unsupported for this graph driver
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Then install &lt;code&gt;fuse-overlayfs&lt;/code&gt;:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo pacman -S fuse-overlayfs
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Then, edit &lt;code&gt;containers.conf&lt;/code&gt; according to &lt;a href=&#34;https://github.com/containers/podman/blob/main/docs/tutorials/rootless_tutorial.md#ensure-fuse-overlayfs-is-installed&#34;&gt;the doc here&lt;/a&gt;.
+For me, I only had to uncomment the &lt;code&gt;mount_program&lt;/code&gt; line in &lt;code&gt;/etc/containers/storage.conf&lt;/code&gt; like this:&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;...
+# Path to an helper program to use for mounting the file system instead of mounting it
+# directly.
+mount_program = &amp;#34;/usr/bin/fuse-overlayfs&amp;#34;
+...
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;references&#34;&gt;References&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://docs.podman.io/en/latest/Introduction.html&#34;&gt;https://docs.podman.io/en/latest/Introduction.html&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/containers/podman/blob/main/docs/tutorials/rootless_tutorial.md&#34;&gt;https://github.com/containers/podman/blob/main/docs/tutorials/rootless_tutorial.md&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://wiki.archlinux.org/title/Podman&#34;&gt;https://wiki.archlinux.org/title/Podman&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://rootlesscontaine.rs/&#34;&gt;https://rootlesscontaine.rs/&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+    </item>
     
     <item>
       <title>Whereabouts of Light (星の在り処) Comments</title>
@@ -79,7 +278,8 @@ Misty: ...Heehee. Whoa, there! Almost felt like I was in my shower back home.
 &lt;p&gt;I prefer to translate it to:&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;愛してるただそれだけで　二人はいつかまた会える
     I love you, just that.
-    The two of us will one day meet again.&lt;/code&gt;&lt;/pre&gt;
+    The two of us will one day meet again.
+&lt;/code&gt;&lt;/pre&gt;
 </description>
     </item>
     
@@ -190,44 +390,44 @@ because of the in-game speedups:&lt;/p&gt;
       <description>&lt;p&gt;I decided to write this after facing the surprisingly annoying process of
 installing various packages for machine learning purposes.&lt;/p&gt;
 &lt;p&gt;Let&amp;rsquo;s start from the beginning. Create an environment on anaconda:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;conda create -n pytorch-env python&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;3&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Switch to the &lt;code&gt;pytorch-env&lt;/code&gt; environment:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;conda activate pytorch-env
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Install PyTorch according to the
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;conda create -n pytorch-env python&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;3&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Switch to the &lt;code&gt;pytorch-env&lt;/code&gt; environment:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;conda activate pytorch-env
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Install PyTorch according to the
 &lt;a href=&#34;https://pytorch.org/get-started/locally/&#34;&gt;official documentation&lt;/a&gt;. Notice that
 it includes &lt;code&gt;cpuonly&lt;/code&gt; instead of &lt;code&gt;cudatoolkit&lt;/code&gt;. This means that there will be no
 CUDA support, which is intentional because I&amp;rsquo;m doing this in a VM.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;conda install pytorch torchvision torchaudio cpuonly -c pytorch
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Install some other packages commonly used for ML:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;conda install opencv matplotlib jupyterlab nb_conda
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;This is the point where I got this message:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;Solving environment: -
-Found conflicts! Looking &lt;span style=&#34;color:#66d9ef&#34;&gt;for&lt;/span&gt; incompatible packages.
-This can take several minutes.  Press CTRL-C to abort.
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;This took a really long time to finish, with failures on top of that. Some
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;conda install pytorch torchvision torchaudio cpuonly -c pytorch
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Install some other packages commonly used for ML:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;conda install opencv matplotlib jupyterlab nb_conda
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;This is the point where I got this message:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Solving environment: -
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Found conflicts! Looking &lt;span style=&#34;color:#66d9ef&#34;&gt;for&lt;/span&gt; incompatible packages.
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;This can take several minutes.  Press CTRL-C to abort.
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;This took a really long time to finish, with failures on top of that. Some
 suggestions like updating packages (&lt;code&gt;conda update --all&lt;/code&gt;) and allowing
 downgrades (&lt;code&gt;conda config --set allow_conda_downgrades true&lt;/code&gt;) didn&amp;rsquo;t help at
 all.&lt;/p&gt;
 &lt;p&gt;Turns out the solution is quite simple, just install from &lt;code&gt;pytorch&lt;/code&gt; channel as
 well:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;conda install -c pytorch opencv matplotlib jupyterlab nb_conda
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;I saw some packages downgraded when I did that:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;  certifi                          2020.12.5-py38h06a4308_0 --&amp;gt; 2020.12.5-py37h06a4308_0
-  mkl-service                          2.3.0-py38he904b0f_0 --&amp;gt; 2.3.0-py37he8ac12f_0
-  mkl_fft                              1.2.1-py38h54f3939_0 --&amp;gt; 1.2.1-py37h54f3939_0
-  mkl_random                           1.1.1-py38h0573a6f_0 --&amp;gt; 1.1.1-py37h0573a6f_0
-  ninja                               1.10.2-py38hff7bd54_0 --&amp;gt; 1.10.2-py37hff7bd54_0
-  numpy                               1.19.2-py38h54aff64_0 --&amp;gt; 1.19.2-py37h54aff64_0
-  numpy-base                          1.19.2-py38hfa32c7d_0 --&amp;gt; 1.19.2-py37hfa32c7d_0
-  pillow                               8.1.0-py38he98fc37_0 --&amp;gt; 8.1.0-py37he98fc37_0
-  pip                                 21.0.1-py38h06a4308_0 --&amp;gt; 21.0.1-py37h06a4308_0
-  python                                   3.8.5-h7579374_1 --&amp;gt; 3.7.9-h7579374_0
-  pytorch                                 1.7.1-py3.8_cpu_0 --&amp;gt; 1.7.1-py3.7_cpu_0
-  setuptools                          52.0.0-py38h06a4308_0 --&amp;gt; 52.0.0-py37h06a4308_0
-  six                                 1.15.0-py38h06a4308_0 --&amp;gt; 1.15.0-py37h06a4308_0
-  torchaudio                                     0.7.2-py38 --&amp;gt; 0.7.2-py37
-  torchvision                                0.8.2-py38_cpu --&amp;gt; 0.8.2-py37_cpu
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;My guess is that the default channel (and &lt;code&gt;conda-forge&lt;/code&gt; too, I tried) didn&amp;rsquo;t
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;conda install -c pytorch opencv matplotlib jupyterlab nb_conda
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;I saw some packages downgraded when I did that:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  certifi                          2020.12.5-py38h06a4308_0 --&amp;gt; 2020.12.5-py37h06a4308_0
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  mkl-service                          2.3.0-py38he904b0f_0 --&amp;gt; 2.3.0-py37he8ac12f_0
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  mkl_fft                              1.2.1-py38h54f3939_0 --&amp;gt; 1.2.1-py37h54f3939_0
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  mkl_random                           1.1.1-py38h0573a6f_0 --&amp;gt; 1.1.1-py37h0573a6f_0
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  ninja                               1.10.2-py38hff7bd54_0 --&amp;gt; 1.10.2-py37hff7bd54_0
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  numpy                               1.19.2-py38h54aff64_0 --&amp;gt; 1.19.2-py37h54aff64_0
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  numpy-base                          1.19.2-py38hfa32c7d_0 --&amp;gt; 1.19.2-py37hfa32c7d_0
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  pillow                               8.1.0-py38he98fc37_0 --&amp;gt; 8.1.0-py37he98fc37_0
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  pip                                 21.0.1-py38h06a4308_0 --&amp;gt; 21.0.1-py37h06a4308_0
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  python                                   3.8.5-h7579374_1 --&amp;gt; 3.7.9-h7579374_0
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  pytorch                                 1.7.1-py3.8_cpu_0 --&amp;gt; 1.7.1-py3.7_cpu_0
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  setuptools                          52.0.0-py38h06a4308_0 --&amp;gt; 52.0.0-py37h06a4308_0
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  six                                 1.15.0-py38h06a4308_0 --&amp;gt; 1.15.0-py37h06a4308_0
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  torchaudio                                     0.7.2-py38 --&amp;gt; 0.7.2-py37
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  torchvision                                0.8.2-py38_cpu --&amp;gt; 0.8.2-py37_cpu
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;My guess is that the default channel (and &lt;code&gt;conda-forge&lt;/code&gt; too, I tried) didn&amp;rsquo;t
 have the older versions of some packages installed through &lt;code&gt;pytorch&lt;/code&gt; in the
 earlier step, so conda just gave up instead.&lt;/p&gt;
 </description>
@@ -278,22 +478,22 @@ Anyway, the fix is clear:&lt;/p&gt;
       
       <guid>https://heryandi.github.io/2020/arch-linux-broken-desktop-environment-in-virtualbox/</guid>
       <description>&lt;p&gt;I updated my Arch VM with the usual command:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;pacman -Syu
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Then, upon rebooting the VM, after logging-in again, the desktop environment would only show a black screen.
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;pacman -Syu
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Then, upon rebooting the VM, after logging-in again, the desktop environment would only show a black screen.
 I was still able to bring up tty2 with &lt;code&gt;Ctrl + Alt + F2&lt;/code&gt;, so it seemed like other than the desktop environment, the VM was running just fine.&lt;/p&gt;
 &lt;p&gt;After some debugging, I suspected that &lt;code&gt;virtualbox-guest-utils&lt;/code&gt; package was the culprit.
 Checking through the update log, it seemed like that package was indeed updated:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;cat /var/log/pacman.log
-...
-&lt;span style=&#34;color:#f92672&#34;&gt;[&lt;/span&gt;2020-05-17T21:21:34+0900&lt;span style=&#34;color:#f92672&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;[&lt;/span&gt;ALPM&lt;span style=&#34;color:#f92672&#34;&gt;]&lt;/span&gt; upgraded xorg-bdftopcf &lt;span style=&#34;color:#f92672&#34;&gt;(&lt;/span&gt;1.1-1 -&amp;gt; 1.1-2&lt;span style=&#34;color:#f92672&#34;&gt;)&lt;/span&gt;
-&lt;span style=&#34;color:#f92672&#34;&gt;[&lt;/span&gt;2020-05-17T21:21:34+0900&lt;span style=&#34;color:#f92672&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;[&lt;/span&gt;ALPM&lt;span style=&#34;color:#f92672&#34;&gt;]&lt;/span&gt; upgraded ttf-hack &lt;span style=&#34;color:#f92672&#34;&gt;(&lt;/span&gt;3.003-1 -&amp;gt; 3.003-2&lt;span style=&#34;color:#f92672&#34;&gt;)&lt;/span&gt;
-&lt;span style=&#34;color:#f92672&#34;&gt;[&lt;/span&gt;2020-05-17T21:21:34+0900&lt;span style=&#34;color:#f92672&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;[&lt;/span&gt;ALPM&lt;span style=&#34;color:#f92672&#34;&gt;]&lt;/span&gt; upgraded virtualbox-guest-utils &lt;span style=&#34;color:#f92672&#34;&gt;(&lt;/span&gt;6.1.6-1 -&amp;gt; 6.1.8-1&lt;span style=&#34;color:#f92672&#34;&gt;)&lt;/span&gt;
-&lt;span style=&#34;color:#f92672&#34;&gt;[&lt;/span&gt;2020-05-17T21:21:34+0900&lt;span style=&#34;color:#f92672&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;[&lt;/span&gt;ALPM&lt;span style=&#34;color:#f92672&#34;&gt;]&lt;/span&gt; upgraded vlc &lt;span style=&#34;color:#f92672&#34;&gt;(&lt;/span&gt;3.0.8-13 -&amp;gt; 3.0.10-1&lt;span style=&#34;color:#f92672&#34;&gt;)&lt;/span&gt;
-&lt;span style=&#34;color:#f92672&#34;&gt;[&lt;/span&gt;2020-05-17T21:21:34+0900&lt;span style=&#34;color:#f92672&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;[&lt;/span&gt;ALPM&lt;span style=&#34;color:#f92672&#34;&gt;]&lt;/span&gt; upgraded vte-common &lt;span style=&#34;color:#f92672&#34;&gt;(&lt;/span&gt;0.60.1-1 -&amp;gt; 0.60.2-2&lt;span style=&#34;color:#f92672&#34;&gt;)&lt;/span&gt;
-...
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;I downgraded back to 6.1.6-1 and things are now good again:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;sudo pacman -U https://archive.archlinux.org/packages/v/virtualbox-guest-utils/virtualbox-guest-utils-6.1.6-1-x86_64.pkg.tar.zst
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;The worst thing about this was that there was no clipboard sharing at the time (because all GUIs were broken), so I had to type the whole URL on the terminal myself :(&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;cat /var/log/pacman.log
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;...
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;[&lt;/span&gt;2020-05-17T21:21:34+0900&lt;span style=&#34;color:#f92672&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;[&lt;/span&gt;ALPM&lt;span style=&#34;color:#f92672&#34;&gt;]&lt;/span&gt; upgraded xorg-bdftopcf &lt;span style=&#34;color:#f92672&#34;&gt;(&lt;/span&gt;1.1-1 -&amp;gt; 1.1-2&lt;span style=&#34;color:#f92672&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;[&lt;/span&gt;2020-05-17T21:21:34+0900&lt;span style=&#34;color:#f92672&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;[&lt;/span&gt;ALPM&lt;span style=&#34;color:#f92672&#34;&gt;]&lt;/span&gt; upgraded ttf-hack &lt;span style=&#34;color:#f92672&#34;&gt;(&lt;/span&gt;3.003-1 -&amp;gt; 3.003-2&lt;span style=&#34;color:#f92672&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;[&lt;/span&gt;2020-05-17T21:21:34+0900&lt;span style=&#34;color:#f92672&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;[&lt;/span&gt;ALPM&lt;span style=&#34;color:#f92672&#34;&gt;]&lt;/span&gt; upgraded virtualbox-guest-utils &lt;span style=&#34;color:#f92672&#34;&gt;(&lt;/span&gt;6.1.6-1 -&amp;gt; 6.1.8-1&lt;span style=&#34;color:#f92672&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;[&lt;/span&gt;2020-05-17T21:21:34+0900&lt;span style=&#34;color:#f92672&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;[&lt;/span&gt;ALPM&lt;span style=&#34;color:#f92672&#34;&gt;]&lt;/span&gt; upgraded vlc &lt;span style=&#34;color:#f92672&#34;&gt;(&lt;/span&gt;3.0.8-13 -&amp;gt; 3.0.10-1&lt;span style=&#34;color:#f92672&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;[&lt;/span&gt;2020-05-17T21:21:34+0900&lt;span style=&#34;color:#f92672&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;[&lt;/span&gt;ALPM&lt;span style=&#34;color:#f92672&#34;&gt;]&lt;/span&gt; upgraded vte-common &lt;span style=&#34;color:#f92672&#34;&gt;(&lt;/span&gt;0.60.1-1 -&amp;gt; 0.60.2-2&lt;span style=&#34;color:#f92672&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;...
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;I downgraded back to 6.1.6-1 and things are now good again:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo pacman -U https://archive.archlinux.org/packages/v/virtualbox-guest-utils/virtualbox-guest-utils-6.1.6-1-x86_64.pkg.tar.zst
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;The worst thing about this was that there was no clipboard sharing at the time (because all GUIs were broken), so I had to type the whole URL on the terminal myself :(&lt;/p&gt;
 </description>
     </item>
     
