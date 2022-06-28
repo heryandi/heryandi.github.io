@@ -6,10 +6,103 @@
     <description>My Notes</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Thu, 21 Apr 2022 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 28 Jun 2022 00:00:00 +0000</lastBuildDate>
     
     <atom:link href="https://heryandi.github.io/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Fix Coursera being broken in Firefox</title>
+      <link>https://heryandi.github.io/2022/fix-coursera-being-broken-in-firefox/</link>
+      <pubDate>Tue, 28 Jun 2022 00:00:00 +0000</pubDate>
+      
+      <guid>https://heryandi.github.io/2022/fix-coursera-being-broken-in-firefox/</guid>
+      <description>&lt;p&gt;I have been unable to open Coursera website on Firefox for a long time now.
+At least 3 years. Maybe 5+ years. Nah, I don&amp;rsquo;t remember since when exactly.
+It just showed the page with this text:&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;Sorry, we are down for maintenance.
+We will be back up shortly.
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Many quick searches on Google didn&amp;rsquo;t show anything, so there are probably not many people experiencing this issue.
+I&amp;rsquo;ve tried disabling all add-ons, but it didn&amp;rsquo;t work either.&lt;/p&gt;
+&lt;p&gt;The website works just fine in Chrome, which makes sense of course, since that&amp;rsquo;s the most widely used browser now, but breaking the entire website for Firefox sounded way too sloppy for Coursera.&lt;/p&gt;
+&lt;p&gt;Their website is quite technically difficult after all: Many different courses, videos, assignment submissions, etc.
+For them to fail to support Firefox entirely didn&amp;rsquo;t sound right.&lt;/p&gt;
+&lt;p&gt;I personally had been using Chrome for Coursera for a very long time to avoid this issue. After many years of that, I finally decided to take a closer look. I had a big hint, after all: It works fine in Chrome.&lt;/p&gt;
+&lt;p&gt;So&amp;hellip; I couldn&amp;rsquo;t even load the home page with Firefox, which should be just basic GET requests.
+What was the raw HTTP header response returned? Here you go:&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;HTTP/2 500 Internal Server Error
+content-type: text/html
+content-length: 1020
+date: Tue, 28 Jun 2022 13:09:22 GMT
+x-cache: Error from cloudfront
+via: 1.1 51840d06a8ec9d04d9a07458d05eb7ce.cloudfront.net (CloudFront)
+x-amz-cf-pop: NRT12-C4
+x-amz-cf-id: vN4DPF4IGSgbTNayll-1asw_NWhOasFrurqOVjtIcY2BJwWcRA3w1w==
+X-Firefox-Spdy: h2
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Not helpful. I tried Google the &lt;code&gt;Error from cloudfront&lt;/code&gt; part too, but nothing interesting showed up.
+Maybe the most helpful part of that was the fact that it&amp;rsquo;s error 500. Gee, thanks.
+If it&amp;rsquo;s actually purely the server&amp;rsquo;s fault, I would expect more complaints of this to be found in Google.&lt;/p&gt;
+&lt;p&gt;Something with the request headers maybe? Let&amp;rsquo;s look there. Here is the one sent by Firefox:&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;GET / HTTP/2
+Host: www.coursera.org
+User-Agent: &amp;lt;redacted&amp;gt;
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8
+Accept-Language: en,en-US;q=0.7,chrome://global/locale/intl.properties;q=0.3
+Accept-Encoding: gzip, deflate, br
+Connection: keep-alive
+Cookie: &amp;lt;redacted&amp;gt;
+Upgrade-Insecure-Requests: 1
+Sec-Fetch-Dest: document
+Sec-Fetch-Mode: navigate
+Sec-Fetch-Site: cross-site
+TE: trailers
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;I can&amp;rsquo;t tell immediately what is wrong. Can you do better?&lt;/p&gt;
+&lt;p&gt;Anyway, what about Chrome? Here it is:&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;:authority: www.coursera.org
+:method: GET
+:path: /
+:scheme: https
+accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9
+accept-encoding: gzip, deflate, br
+accept-language: en-US,en;q=0.9
+cache-control: no-cache
+cookie: &amp;lt;redacted&amp;gt;
+pragma: no-cache
+referer: https://www.coursera.org/?authMode=login
+sec-ch-ua: &amp;lt;redacted&amp;gt;
+sec-ch-ua-mobile: ?0
+sec-ch-ua-platform: &amp;#34;Windows&amp;#34;
+sec-fetch-dest: document
+sec-fetch-mode: navigate
+sec-fetch-site: same-origin
+sec-fetch-user: ?1
+upgrade-insecure-requests: 1
+user-agent: &amp;lt;redacted&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Okay, a few headers are different, of course.
+Here is my list of suspects:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;user-agent&lt;/li&gt;
+&lt;li&gt;accept&lt;/li&gt;
+&lt;li&gt;accept-language&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Now, let&amp;rsquo;s copy-paste the value sent by Chrome one-by-one and resend the HTTP request from Firefox.
+To do this on Firefox: Open up Web Developer Tools, Network tab, right-click on the failing request, then choose &lt;code&gt;Edit and Resend&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;&amp;hellip;and voila, &lt;code&gt;accept-language&lt;/code&gt; is the problem.
+What&amp;rsquo;s wrong with the value sent by Firefox?&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;Accept-Language: en,en-US;q=0.7,chrome://global/locale/intl.properties;q=0.3
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;With just this, that &lt;code&gt;chrome://global/locale/intl.properties&lt;/code&gt; stuff looks suspicious as hell.
+Time to look it up. I found this in Ubuntu bugs: &lt;a href=&#34;https://bugs.launchpad.net/ubuntu/+source/firefox/+bug/643899&#34;&gt;&lt;code&gt;Firefox sending header &amp;quot;Accept-Language: chrome://global/locale/intl.properties&amp;quot;&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Well&amp;hellip; the bug was filed in 2010. By the way, Coursera was founded in 2012 lol.&lt;/p&gt;
+&lt;p&gt;Anyway, I guess I&amp;rsquo;ve been affected by the bug very long because I have been using Firefox Sync to sync my preferences everywhere on new computers, effectively perpetuating the bug to myself.
+Also, I never thought of trying out Coursera when I just finished setting up a VM either, so I never tried a real clean Firefox on Coursera.&lt;/p&gt;
+&lt;p&gt;We don&amp;rsquo;t really need to figure out where the &lt;code&gt;chrome://global/locale/intl.properties&lt;/code&gt; value came from. Let&amp;rsquo;s just remove it!&lt;/p&gt;
+&lt;p&gt;Go to &lt;code&gt;about:config&lt;/code&gt;, look for &lt;code&gt;intl.accept_languages&lt;/code&gt;, click the &lt;code&gt;reset&lt;/code&gt; button &amp;hellip;and Coursera website can load just fine in Firefox now! The value of &lt;code&gt;intl.accept_languages&lt;/code&gt; shown in &lt;code&gt;about:config&lt;/code&gt; now is:&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;en-US, en
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Next question: Why only Coursera? For the real answer, go ask Coursera folks, of course.&lt;/p&gt;
+&lt;p&gt;My best guess is that they have their own custom web server and it considers that &lt;code&gt;chrome://global/locale/intl.properties&lt;/code&gt; value in &lt;code&gt;accept-language&lt;/code&gt; as suspicious and rejects it immediately. Or maybe it tries to parse that value and failed miserably lol.&lt;/p&gt;
+&lt;p&gt;Or&amp;hellip; Wait, the error message earlier said something about Cloudflare, so maybe it&amp;rsquo;s something about that instead. Well, I don&amp;rsquo;t want to dig further. Bye!&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>Development Environment with Buildah and Podman</title>
